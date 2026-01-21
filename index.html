@@ -273,7 +273,7 @@
 
     <!-- Ecrã do Visualizador -->
     <div id="viewer-screen">
-                <!-- Modal para foto em tamanho real -->
+        <!-- Modal para foto em tamanho real -->
         <div id="foto-modal" onclick="fecharModal()">
             <span id="foto-modal-close">&times;</span>
             <img id="foto-modal-img">
@@ -592,7 +592,7 @@
                     }
                     
                     if (fotoUrl) {
-                        popup += `<img src="${fotoUrl}" alt="Foto do ponto">`;
+                        popup += `<img src="${fotoUrl}" alt="Foto do ponto" onclick="abrirFoto('${fotoUrl}'); event.stopPropagation();">`;
                     } else {
                         popup += `<p style="color:#999;font-size:11px;">📷 Foto não encontrada: ${fotoNome}</p>`;
                     }
@@ -670,8 +670,8 @@
             const bounds = L.latLngBounds(all.map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]));
             map.fitBounds(bounds, { padding: [50, 50] });
         }
-
-                // Funções para modal de foto
+        
+        // Funções para modal de foto
         function abrirFoto(url) {
             document.getElementById('foto-modal-img').src = url;
             document.getElementById('foto-modal').style.display = 'block';
