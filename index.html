@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Trajeto</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; height: 100vh; overflow: hidden; }
+        
+        /* Ecrã de upload */
+        #upload-screen { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .upload-container { 
+            background: white; 
+            border-radius: 15px; 
+            padding: 40px; 
+            max-width: 600px; 
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .upload-container h1 { 
+            color: #333; 
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .upload-container p { 
+            color: #666; 
+            margin-bottom: 30px;
+        }
+        .upload-area { 
+            border: 3px dashed #ddd; 
+            border-radius: 10px; 
+            padding: 30px; 
+            text-align: center;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .upload-area:hover { 
+            border-color: #667eea; 
+            background: #f8f9ff;
+        }
+        .upload-area.loaded { 
+            border-color: #10b981; 
+            background: #f0fdf4;
+        }
+        .upload-area input { display: none; }
+        .upload-area label { 
+            cursor: pointer; 
+            display: block;
+        }
+        .upload-icon { 
+            font-size: 40px; 
+            margin-bottom: 10px;
+        }
+        .upload-text { 
+            color: #666; 
+            font-size: 14px;
+        }
+        .upload-status { 
+            color: #10b981; 
+            font-weight: bold; 
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .btn-start { 
+            width: 100%; 
+            background: #667eea; 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        .btn-start:hover { 
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-start:disabled { 
+            background: #ccc; 
+            cursor: not-allowed;
+            transform: none;
+        }
+        .error-msg { 
+            background: #fee; 
+            color: #c00; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        /* Visualizador */
+        #viewer-screen { display: none; }
+        #container { display: flex; height: 100vh; }
+        #map-container { flex: 1; }
+        #map { width: 100%; height: 100%; }
+        
+        #video-container { 
+            width: 480px; 
+            background: #000; 
+            display: flex; 
+            flex-direction: column;
+        }
+        #player { width: 100%; height: 270px; }
+        #controls { 
+            background: #1a1a1a; 
+            color: white; 
+            padding: 15px; 
+            flex: 1; 
+            overflow-y: auto;
+        }
+        
+        .control-group { margin-bottom: 15px; }
+        .control-group label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-size: 12px; 
+            color: #aaa;
+        }
+        
+        button.control-btn { 
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            padding: 10px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 0 5px 5px 0;
+            font-size: 13px;
+        }
+        button.control-btn:hover { background: #1d4ed8; }
+        
+        #sync-indicator { 
+            padding: 8px 12px; 
+            background: #10b981; 
+            border-radius: 5px; 
+            font-size: 12px;
+            display: inline-block;
+        }
+        #sync-indicator.inactive { background: #ef4444; }
+        
+        .info-box { 
+            background: #2a2a2a; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        .info-box div { margin-bottom: 5px; }
+        
+        .popup-content { padding: 12px; }
+        .popup-content h3 { margin-bottom: 10px; color: #2563eb; }
+        .popup-content img { 
+            width: 100%; 
+            border-radius: 5px; 
+            margin: 10px 0;
+            max-height: 200px;
+            object-fit: cover;
+        }
+        .popup-content p { margin: 5px 0; font-size: 13px; }
+        
+        @media (max-width: 768px) {
+            #container { flex-direction: column; }
+            #video-container { width: 100%; height: 50%; }
+            #map-container { height: 50%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Ecrã de Upload -->
+    <div id="upload-screen">
+        <div class="upload-container">
+            <h1>🗺️ Visualizador de Trajeto</h1>
+            <p>Carrega os 3 ficheiros GeoJSON para começar</p>
+            
+            <div class="upload-area" id="area-pontos">
+                <label for="file-pontos">
+                    <div class="upload-icon">📍</div>
+                    <div class="upload-text">Pontos Críticos (.json)</div>
+                    <div class="upload-status" id="status-pontos"></div>
+                </label>
+                <input type="file" id="file-pontos" accept=".json,.geojson">
+            </div>
+            
+            <div class="upload-area" id="area-track">
+                <label for="file-track">
+                    <div class="upload-icon">🛰️</div>
+                    <div class="upload-text">Track Points GPS (.json)</div>
+                    <div class="upload-status" id="status-track"></div>
+                </label>
+                <input type="file" id="file-track" accept=".json,.geojson">
+            </div>
+            
+            <div class="upload-area" id="area-estrada">
+                <label for="file-estrada">
+                    <div class="upload-icon">🛣️</div>
+                    <div class="upload-text">Estrada Base (.json)</div>
+                    <div class="upload-status" id="status-estrada"></div>
+                </label>
+                <input type="file" id="file-estrada" accept=".json,.geojson">
+            </div>
+            
+            <div id="error-container"></div>
+            
+            <button class="btn-start" id="btn-start" disabled>Iniciar Visualizador</button>
+        </div>
+    </div>
+
+    <!-- Ecrã do Visualizador -->
+    <div id="viewer-screen">
+        <div id="container">
+            <div id="map-container">
+                <div id="map"></div>
+            </div>
+            <div id="video-container">
+                <div id="player"></div>
+                <div id="controls">
+                    <div class="control-group">
+                        <label>Estado da Sincronização</label>
+                        <span id="sync-indicator">A carregar...</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Controlos</label>
+                        <button class="control-btn" onclick="togglePlayPause()">▶️ Play/Pause</button>
+                        <button class="control-btn" onclick="resetView()">🔄 Reset Vista</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Camadas</label>
+                        <button class="control-btn" onclick="toggleLayer('track')" id="btn-track">🔵 Trilha GPS</button>
+                        <button class="control-btn" onclick="toggleLayer('critical')" id="btn-critical">🔴 Pontos Críticos</button>
+                        <button class="control-btn" onclick="toggleLayer('road')" id="btn-road">⚫ Estrada Base</button>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div><strong>Pontos Críticos:</strong> <span id="info-critical">-</span></div>
+                        <div><strong>Pontos GPS:</strong> <span id="info-track">-</span></div>
+                        <div><strong>Distância:</strong> <span id="info-distance">-</span></div>
+                        <div><strong>Tempo:</strong> <span id="current-time">00:00</span> / <span id="total-time">00:00</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Dados carregados
+        let DATA = {
+            pontos: null,
+            track: null,
+            estrada: null,
+            videoId: null
+        };
+        
+        // Variáveis do visualizador
+        let player, map;
+        let layers = { track: null, critical: null, road: null };
+        let markers = { track: [], critical: [] };
+        let syncInterval = null;
+        
+        // Upload de ficheiros
+        function setupFileUpload(type, inputId, areaId, statusId) {
+            const input = document.getElementById(inputId);
+            const area = document.getElementById(areaId);
+            const status = document.getElementById(statusId);
+            
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        
+                        // Processar dados
+                        if (type === 'pontos') {
+                            // Adicionar .jpg aos nomes das fotos
+                            data.features = data.features.map(f => ({
+                                ...f,
+                                properties: {
+                                    ...f.properties,
+                                    foto: f.properties.foto ? `${f.properties.foto}.jpg` : null
+                                }
+                            }));
+                        }
+                        
+                        DATA[type] = data;
+                        status.textContent = '✓ Carregado';
+                        area.classList.add('loaded');
+                        
+                        // Extrair Video ID se for track
+                        if (type === 'track' && !DATA.videoId) {
+                            for (const f of data.features) {
+                                if (f.properties.link_video) {
+                                    const match = f.properties.link_video.match(/(?:v=|youtu\.be\/)([^&?]+)/);
+                                    if (match) {
+                                        DATA.videoId = match[1];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        checkAllLoaded();
+                    } catch (err) {
+                        showError(`Erro ao ler ${type}: ${err.message}`);
+                        status.textContent = '✗ Erro';
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
+        
+        function checkAllLoaded() {
+            const btn = document.getElementById('btn-start');
+            if (DATA.pontos && DATA.track && DATA.estrada) {
+                btn.disabled = false;
+            }
+        }
+        
+        function showError(msg) {
+            const container = document.getElementById('error-container');
+            container.innerHTML = `<div class="error-msg">${msg}</div>`;
+        }
+        
+        // Inicializar uploads
+        setupFileUpload('pontos', 'file-pontos', 'area-pontos', 'status-pontos');
+        setupFileUpload('track', 'file-track', 'area-track', 'status-track');
+        setupFileUpload('estrada', 'file-estrada', 'area-estrada', 'status-estrada');
+        
+        // Botão iniciar
+        document.getElementById('btn-start').addEventListener('click', () => {
+            document.getElementById('upload-screen').style.display = 'none';
+            document.getElementById('viewer-screen').style.display = 'block';
+            initYouTube();
+        });
+        
+        // YouTube API
+        function initYouTube() {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(tag);
+        }
+        
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '270',
+                width: '480',
+                videoId: DATA.videoId,
+                playerVars: { playsinline: 1, controls: 1, rel: 0 },
+                events: {
+                    onReady: onPlayerReady,
+                    onStateChange: onPlayerStateChange,
+                    onError: onPlayerError
+                }
+            });
+        }
+        
+        function onPlayerReady() {
+            initMap();
+            updateStats();
+            startSync();
+        }
+        
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+                startSync();
+            }
+        }
+        
+        function onPlayerError(event) {
+            const errors = {
+                2: 'Pedido inválido',
+                5: 'Erro no player HTML5',
+                100: 'Vídeo não encontrado',
+                101: 'Vídeo não permite embedding',
+                150: 'Vídeo restrito para embedding',
+                153: 'Erro de referrer - ficheiro local não suportado'
+            };
+            
+            if (event.data === 153) {
+                // Erro 153: ficheiro local não funciona
+                document.getElementById('sync-indicator').textContent = 'Modo Só Mapa (Erro 153)';
+                document.getElementById('sync-indicator').classList.add('inactive');
+                
+                // Criar link para YouTube
+                const videoLink = `https://www.youtube.com/watch?v=${DATA.videoId}`;
+                const playerDiv = document.getElementById('player');
+                playerDiv.innerHTML = `
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#1a1a1a;color:white;text-align:center;padding:20px;">
+                        <div style="font-size:48px;margin-bottom:20px;">⚠️</div>
+                        <div style="font-size:16px;margin-bottom:10px;font-weight:bold;">Erro 153: YouTube bloqueado</div>
+                        <div style="font-size:13px;color:#aaa;margin-bottom:20px;">Ficheiros locais (file://) não podem carregar vídeos do YouTube</div>
+                        <a href="${videoLink}" target="_blank" style="background:#ff0000;color:white;padding:12px 24px;border-radius:5px;text-decoration:none;font-weight:bold;">▶️ Abrir no YouTube</a>
+                        <div style="font-size:12px;color:#666;margin-top:20px;">💡 Solução: Usa um servidor local ou hospeda online</div>
+                    </div>
+                `;
+                
+                // Continuar com mapa funcional
+                alert('⚠️ Erro 153: YouTube bloqueado em ficheiros locais\n\n✅ O MAPA continua funcional!\n\n💡 Soluções:\n1. Abrir vídeo noutra janela (link criado)\n2. Usar servidor local (python -m http.server)\n3. Hospedar online (GitHub Pages, Netlify)');
+            } else {
+                alert('⚠️ Erro YouTube (' + event.data + '): ' + (errors[event.data] || 'Erro desconhecido'));
+                document.getElementById('sync-indicator').textContent = 'Erro no Vídeo';
+                document.getElementById('sync-indicator').classList.add('inactive');
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('info-critical').textContent = DATA.pontos.features.length;
+            document.getElementById('info-track').textContent = DATA.track.features.length;
+            const dist = DATA.estrada.features[0]?.properties?.Comprimento || 0;
+            document.getElementById('info-distance').textContent = (dist / 1000).toFixed(2) + ' km';
+        }
+        
+        function initMap() {
+            const first = DATA.track.features[0].geometry.coordinates;
+            map = L.map('map').setView([first[1], first[0]], 14);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+            
+            // Estrada base
+            layers.road = L.geoJSON(DATA.estrada, {
+                style: { color: '#666', weight: 4, opacity: 0.6 }
+            }).addTo(map);
+            
+            // Pontos GPS
+            DATA.track.features.forEach((f) => {
+                const c = f.geometry.coordinates;
+                const m = L.circleMarker([c[1], c[0]], {
+                    radius: 3,
+                    fillColor: '#3b82f6',
+                    color: '#1e40af',
+                    weight: 1,
+                    opacity: 0.8,
+                    fillOpacity: 0.6
+                });
+                
+                m.on('click', () => {
+                    if (player && player.seekTo) {
+                        player.seekTo(f.properties.video_sec, true);
+                    }
+                });
+                
+                markers.track.push(m);
+            });
+            
+            layers.track = L.layerGroup(markers.track).addTo(map);
+            
+            // Pontos críticos
+            DATA.pontos.features.forEach(f => {
+                const c = f.geometry.coordinates;
+                const p = f.properties;
+                
+                const icon = L.divIcon({
+                    html: `<div style="background: white; border: 2px solid #ef4444; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #ef4444;">${p.id}</div>`,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+                
+                const m = L.marker([c[1], c[0]], { icon });
+                
+                let popup = `<div class="popup-content"><h3>Ponto ${p.id} - Troço ${p.Troço}</h3>`;
+                popup += `<p><strong>Tipo:</strong> ${p.tipo_elemento || 'N/A'}</p>`;
+                popup += `<p><strong>Descrição:</strong> ${p.descricao || 'N/A'}</p>`;
+                if (p.largura_aproximada) popup += `<p><strong>Largura:</strong> ${p.largura_aproximada}m</p>`;
+                if (p.altura_aproximada) popup += `<p><strong>Altura:</strong> ${p.altura_aproximada}m</p>`;
+                if (p.Obs) popup += `<p><strong>Obs:</strong> ${p.Obs}</p>`;
+                if (p.foto) popup += `<img src="${p.foto}" onerror="this.style.display='none'">`;
+                if (p.video) popup += `<p><a href="${p.video}" target="_blank">🎥 Ver Vídeo</a></p>`;
+                popup += '</div>';
+                
+                m.bindPopup(popup, { maxWidth: 350 });
+                markers.critical.push(m);
+            });
+            
+            layers.critical = L.layerGroup(markers.critical).addTo(map);
+            
+            // Ajustar vista
+            const all = [...DATA.track.features, ...DATA.pontos.features];
+            const bounds = L.latLngBounds(all.map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]));
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+        
+        function startSync() {
+            if (syncInterval) clearInterval(syncInterval);
+            
+            syncInterval = setInterval(() => {
+                if (!player || !player.getCurrentTime) return;
+                
+                const t = player.getCurrentTime();
+                const d = player.getDuration();
+                
+                document.getElementById('current-time').textContent = formatTime(t);
+                document.getElementById('total-time').textContent = formatTime(d);
+                
+                markers.track.forEach((m, i) => {
+                    const pt = DATA.track.features[i].properties.video_sec;
+                    
+                    if (pt <= t) {
+                        m.setStyle({ fillColor: '#10b981', color: '#047857', radius: 4, fillOpacity: 0.8 });
+                    } else if (pt <= t + 5) {
+                        m.setStyle({ fillColor: '#f59e0b', color: '#d97706', radius: 5, fillOpacity: 1 });
+                    } else {
+                        m.setStyle({ fillColor: '#3b82f6', color: '#1e40af', radius: 3, fillOpacity: 0.6 });
+                    }
+                });
+                
+                document.getElementById('sync-indicator').textContent = 'Sincronizado';
+                document.getElementById('sync-indicator').classList.remove('inactive');
+            }, 500);
+        }
+        
+        function formatTime(s) {
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
+        }
+        
+        function togglePlayPause() {
+            if (!player) return;
+            player.getPlayerState() === 1 ? player.pauseVideo() : player.playVideo();
+        }
+        
+        function toggleLayer(l) {
+            if (!map || !layers[l]) return;
+            
+            if (map.hasLayer(layers[l])) {
+                map.removeLayer(layers[l]);
+                document.getElementById('btn-' + l).style.opacity = '0.5';
+            } else {
+                map.addLayer(layers[l]);
+                document.getElementById('btn-' + l).style.opacity = '1';
+            }
+        }
+        
+        function resetView() {
+            const all = [...DATA.track.features, ...DATA.pontos.features];
+            const bounds = L.latLngBounds(all.map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]));
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+    </script>
+</body>
+</html>
