@@ -214,6 +214,15 @@
                 <input type="file" id="file-estrada" accept=".json,.geojson">
             </div>
             
+            <div class="upload-area" id="area-fotos">
+                <label for="file-fotos">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">Pasta de Fotos (múltiplos .jpg)</div>
+                    <div class="upload-status" id="status-fotos"></div>
+                </label>
+                <input type="file" id="file-fotos" accept="image/*" multiple webkitdirectory directory>
+            </div>
+            
             <div id="error-container"></div>
             
             <button class="btn-start" id="btn-start" disabled>Iniciar Visualizador</button>
@@ -265,7 +274,8 @@
             pontos: null,
             track: null,
             estrada: null,
-            videoId: null
+            videoId: null,
+            fotos: {}  // Objeto para armazenar fotos como URLs
         };
         
         // Variáveis do visualizador
@@ -330,7 +340,7 @@
         
         function checkAllLoaded() {
             const btn = document.getElementById('btn-start');
-            if (DATA.pontos && DATA.track && DATA.estrada) {
+            if (DATA.pontos && DATA.track && DATA.estrada && Object.keys(DATA.fotos).length > 0) {
                 btn.disabled = false;
             }
         }
@@ -344,6 +354,40 @@
         setupFileUpload('pontos', 'file-pontos', 'area-pontos', 'status-pontos');
         setupFileUpload('track', 'file-track', 'area-track', 'status-track');
         setupFileUpload('estrada', 'file-estrada', 'area-estrada', 'status-estrada');
+        setupFotosUpload();
+        
+        // Upload de fotos
+        function setupFotosUpload() {
+            const input = document.getElementById('file-fotos');
+            const area = document.getElementById('area-fotos');
+            const status = document.getElementById('status-fotos');
+            
+            input.addEventListener('change', (e) => {
+                const files = e.target.files;
+                if (!files || files.length === 0) return;
+                
+                let count = 0;
+                DATA.fotos = {}; // Limpar fotos anteriores
+                
+                // Processar cada ficheiro
+                Array.from(files).forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const url = URL.createObjectURL(file);
+                        // Guardar com o nome do ficheiro
+                        DATA.fotos[file.name] = url;
+                        count++;
+                    }
+                });
+                
+                if (count > 0) {
+                    status.textContent = `✓ ${count} foto${count > 1 ? 's' : ''} carregada${count > 1 ? 's' : ''}`;
+                    area.classList.add('loaded');
+                    checkAllLoaded();
+                } else {
+                    status.textContent = '✗ Nenhuma imagem encontrada';
+                }
+            });
+        }
         
         // Botão iniciar
         document.getElementById('btn-start').addEventListener('click', () => {
@@ -484,7 +528,28 @@
                 if (p.largura_aproximada) popup += `<p><strong>Largura:</strong> ${p.largura_aproximada}m</p>`;
                 if (p.altura_aproximada) popup += `<p><strong>Altura:</strong> ${p.altura_aproximada}m</p>`;
                 if (p.Obs) popup += `<p><strong>Obs:</strong> ${p.Obs}</p>`;
-                if (p.foto) popup += `<img src="${p.foto}" onerror="this.style.display='none'">`;
+                
+                // Procurar foto correspondente
+                if (p.foto) {
+                    // Tentar encontrar a foto no objeto de fotos carregadas
+                    const fotoNome = p.foto.split('/').pop(); // Extrai só o nome do ficheiro
+                    let fotoUrl = null;
+                    
+                    // Procurar por nome exato ou similar
+                    for (const [nome, url] of Object.entries(DATA.fotos)) {
+                        if (nome === fotoNome || nome.includes(fotoNome.replace('.jpg', ''))) {
+                            fotoUrl = url;
+                            break;
+                        }
+                    }
+                    
+                    if (fotoUrl) {
+                        popup += `<img src="${fotoUrl}" alt="Foto do ponto">`;
+                    } else {
+                        popup += `<p style="color:#999;font-size:11px;">📷 Foto não encontrada: ${fotoNome}</p>`;
+                    }
+                }
+                
                 if (p.video) popup += `<p><a href="${p.video}" target="_blank">🎥 Ver Vídeo</a></p>`;
                 popup += '</div>';
                 
