@@ -306,7 +306,17 @@
                         area.classList.add('loaded');
                         
                         // Extrair Video ID se for track
-                        Data.videoId = YF7XsgxCI64
+                        if (type === 'track' && !DATA.videoId) {
+                            for (const f of data.features) {
+                                if (f.properties.link_video) {
+                                    const match = f.properties.link_video.match(/(?:v=|youtu\.be\/)([^&?]+)/);
+                                    if (match) {
+                                        DATA.videoId = match[1];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                         
                         checkAllLoaded();
                     } catch (err) {
@@ -381,11 +391,35 @@
                 5: 'Erro no player HTML5',
                 100: 'Vídeo não encontrado',
                 101: 'Vídeo não permite embedding',
-                150: 'Vídeo não permite embedding'
+                150: 'Vídeo restrito para embedding',
+                153: 'Erro de referrer - ficheiro local não suportado'
             };
-            alert('⚠️ Erro YouTube: ' + (errors[event.data] || 'Erro desconhecido'));
-            document.getElementById('sync-indicator').textContent = 'Erro no Vídeo';
-            document.getElementById('sync-indicator').classList.add('inactive');
+            
+            if (event.data === 153) {
+                // Erro 153: ficheiro local não funciona
+                document.getElementById('sync-indicator').textContent = 'Modo Só Mapa (Erro 153)';
+                document.getElementById('sync-indicator').classList.add('inactive');
+                
+                // Criar link para YouTube
+                const videoLink = `https://www.youtube.com/watch?v=${DATA.videoId}`;
+                const playerDiv = document.getElementById('player');
+                playerDiv.innerHTML = `
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#1a1a1a;color:white;text-align:center;padding:20px;">
+                        <div style="font-size:48px;margin-bottom:20px;">⚠️</div>
+                        <div style="font-size:16px;margin-bottom:10px;font-weight:bold;">Erro 153: YouTube bloqueado</div>
+                        <div style="font-size:13px;color:#aaa;margin-bottom:20px;">Ficheiros locais (file://) não podem carregar vídeos do YouTube</div>
+                        <a href="${videoLink}" target="_blank" style="background:#ff0000;color:white;padding:12px 24px;border-radius:5px;text-decoration:none;font-weight:bold;">▶️ Abrir no YouTube</a>
+                        <div style="font-size:12px;color:#666;margin-top:20px;">💡 Solução: Usa um servidor local ou hospeda online</div>
+                    </div>
+                `;
+                
+                // Continuar com mapa funcional
+                alert('⚠️ Erro 153: YouTube bloqueado em ficheiros locais\n\n✅ O MAPA continua funcional!\n\n💡 Soluções:\n1. Abrir vídeo noutra janela (link criado)\n2. Usar servidor local (python -m http.server)\n3. Hospedar online (GitHub Pages, Netlify)');
+            } else {
+                alert('⚠️ Erro YouTube (' + event.data + '): ' + (errors[event.data] || 'Erro desconhecido'));
+                document.getElementById('sync-indicator').textContent = 'Erro no Vídeo';
+                document.getElementById('sync-indicator').classList.add('inactive');
+            }
         }
         
         function updateStats() {
