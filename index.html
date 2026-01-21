@@ -27,9 +27,8 @@
             max-width: 600px; 
             width: 90%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            margin: auto;  /* ADICIONA ISTO */
-            max-height: 95vh;  /* ADICIONA ISTO */
-            overflow-y: auto; 
+            margin: auto;
+            max-height: 95vh; 
         }
         .upload-container h1 { 
             color: #333; 
@@ -607,12 +606,11 @@
                 
                 const m = L.marker([c[1], c[0]], { icon });
                 
-                let popup = `<div class="popup-content"><h3>Ponto ${p.id} - Troço ${p.Troço}</h3>`;
-                popup += `<p><strong>Tipo:</strong> ${p.tipo_elemento || 'N/A'}</p>`;
-                popup += `<p><strong>Descrição:</strong> ${p.descricao || 'N/A'}</p>`;
+                let popup = `<div class="popup-content"><h3>Ponto ${p.id}</h3>`;
+                popup += `<p><strong>${p.descricao || 'N/A'}</strong> </p>`;
                 if (p.largura_aproximada) popup += `<p><strong>Largura:</strong> ${p.largura_aproximada}m</p>`;
                 if (p.altura_aproximada) popup += `<p><strong>Altura:</strong> ${p.altura_aproximada}m</p>`;
-                if (p.Obs) popup += `<p><strong>Obs:</strong> ${p.Obs}</p>`;
+                if (p.Obs) popup += `<p><strong>Obs:</strong> ${p.Obs.replace(/\n/g, '<br>')}</p>`;
                 
                 // Procurar foto correspondente
                 if (p.foto) {
