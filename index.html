@@ -105,11 +105,24 @@
         
         /* Visualizador */
         #viewer-screen { display: none; }
-        #container { display: flex;  flex-direction: column; height: 100vh; }
-        #header {display: flex; align-items: center; gap: 12px; padding: 12px 20px; background-color: #ffffff; border-bottom: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
-        #header h1 {font-weight: bold; font-size: 18px; margin: 0;}
+        #container { display: flex; height: 100vh; }
+        #header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 480px;  /* Deixa espaço para o vídeo */
+            z-index: 1000;
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 12px 20px; 
+            background-color: #ffffff; 
+            border-bottom: 1px solid #ddd; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        #header h1 {font-weight: bold; font-size: 22px; margin: 0;}
         #logo {height: 40px;}
-        #map-container { flex: 1; }
+        #map-container { flex: 1;padding-top: 65px;  /* Altura do header */}
         #map { width: 100%; height: 100%; }
         
         #video-container { 
@@ -119,6 +132,11 @@
             flex-direction: column;
         }
         #player { width: 100%; height: 270px; }
+        /* Responsivo */
+        @media (max-width: 768px) {
+            #header { right: 0; }  /* Header ocupa tudo em mobile */
+            #map-container { padding-top: 65px; }
+        }
         #controls { 
             background: #1a1a1a; 
             color: white; 
@@ -229,8 +247,8 @@
     <!-- Ecrã de Upload -->
     <div id="upload-screen">
         <div class="upload-container">
-            <h1>🗺️ Visualizador de Trajeto</h1>
-            <p>Carrega os 3 ficheiros GeoJSON para começar</p>
+            <h1>🗺️ Visualizador de Trajeto e Vídeo Georreferenciado</h1>
+            <p>Carregue os 3 ficheiros GeoJSON e a pasta de fotografias para começar</p>
             
             <div class="upload-area" id="area-pontos">
                 <label for="file-pontos">
@@ -284,7 +302,7 @@
         
         <div id="container">
             <header id="header">
-              <img src="logoMGCS.png" alt="Logo" id="logo">
+              <img src="https://github.com/j-guimaraes/map_video_viewer/blob/531c563349bfda2a4e5b67be80e3fc6dcd821bcf/logoMGCS.jpg" alt="Logo" id="logo">
               <h1>| Visualizador Vídeo Georreferenciado </h1>
             </header>
 
