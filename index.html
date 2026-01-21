@@ -28,7 +28,7 @@
             width: 90%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             margin: auto;
-            max-height: 95vh; 
+            max-height: auto; 
         }
         .upload-container h1 { 
             color: #333; 
@@ -87,6 +87,7 @@
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 20px;
+            margin-bottom: 20px;
         }
         .btn-start:hover { 
             background: #5568d3;
@@ -114,7 +115,7 @@
             position: absolute;
             top: 0;
             left: 0;
-            right: 480px;  /* Deixa espaço para o vídeo */
+            right: 520px;
             z-index: 1000;
             display: flex; 
             align-items: center; 
@@ -130,67 +131,134 @@
         #map { width: 100%; height: 100%; }
         
         #video-container { 
-            width: 720px; 
-            background: #000; 
+            width: 520px; 
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
             border-radius: 8px;
             display: flex; 
             flex-direction: column;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.3);
             z-index: 1000;
         }
-        #player { width: 100%; height: 270px; }
+        
+        #player { width: 100%; height: 340px; }
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
         /* Responsivo */
         @media (max-width: 768px) {
+            #video-container { width: 100%; }
+            #player { height: 250px; }
             #header { right: 0; }  /* Header ocupa tudo em mobile */
-            #map-container { padding-top: 65px; }
         }
+        
         #controls { 
-            background: #1a1a1a; 
+            background: linear-gradient(180deg, #1e1e1e 0%, #151515 100%); 
             color: white; 
-            padding: 15px; 
+            padding: 20px; 
             flex: 1; 
             overflow-y: auto;
         }
         
-        .control-group { margin-bottom: 15px; }
+        .control-group { 
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
         .control-group label { 
             display: block; 
             margin-bottom: 5px; 
-            font-size: 12px; 
+            font-size: 13px; 
             color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
         }
         
-        button.control-btn { 
-            background: #2563eb; 
+        button.control-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white; 
             border: none; 
-            padding: 10px 15px; 
-            border-radius: 5px; 
+            padding: 10px 16px; 
+            border-radius: 8px; 
             cursor: pointer; 
-            margin: 0 5px 5px 0;
+            margin: 0 5px 8px 0;
             font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
         }
-        button.control-btn:hover { background: #1d4ed8; }
+        button.control-btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
+        }
+
+        button.control-btn:active {
+            transform: translateY(0);
+        }
         
         #sync-indicator { 
-            padding: 8px 12px; 
-            background: #10b981; 
-            border-radius: 5px; 
+            padding: 10px 16px; 
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 8px; 
             font-size: 12px;
             display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3);
         }
-        #sync-indicator.inactive { background: #ef4444; }
+        
+        #sync-indicator.inactive { 
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 3px 8px rgba(239, 68, 68, 0.3);
+        }
         
         .info-box { 
-            background: #2a2a2a; 
-            padding: 10px; 
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.08);
+            padding: 15px; 
+            border-radius: 10px; 
             margin-top: 10px;
-            padding: 12px;
             font-size: 12px;
-            z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
-        .info-box div { margin-bottom: 5px; }
+        
+        .info-box div { 
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .info-box div:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        /* Créditos no canto inferior esquerdo */
+        #credits {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        #credits a {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        #credits a:hover {
+            color: #667eea;
+        }
         
         .popup-content { padding: 12px; }
         .popup-content h3 { margin-bottom: 10px; color: #2563eb; }
@@ -312,7 +380,7 @@
         
         <div id="container">
             <header id="header">
-              <img src="https://github.com/j-guimaraes/map_video_viewer/blob/531c563349bfda2a4e5b67be80e3fc6dcd821bcf/logoMGCS.jpg" alt="Logo" id="logo">
+              <img id="logo" src="logoMGCS.jpg" alt="Logo">
               <h1>| 🗺️ Visualizador de Trajeto e Vídeo Georreferenciado</h1>
             </header>
 
@@ -331,13 +399,6 @@
                         <label>Controlos</label>
                         <button class="control-btn" onclick="togglePlayPause()">▶️ Play/Pause</button>
                         <button class="control-btn" onclick="resetView()">🔄 Reset Vista</button>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>Camadas</label>
-                        <button class="control-btn" onclick="toggleLayer('track')" id="btn-track">🔵 Trilha GPS</button>
-                        <button class="control-btn" onclick="toggleLayer('critical')" id="btn-critical">🔴 Pontos Críticos</button>
-                        <button class="control-btn" onclick="toggleLayer('road')" id="btn-road">⚫ Estrada Base</button>
                     </div>
                     
                     <div class="info-box">
@@ -564,6 +625,44 @@
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap'
             }).addTo(map);
+
+            // Camadas base
+            const osmBase = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            });
+            
+            const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                attribution: '© Google',
+                maxZoom: 20
+            });
+            
+            const ortofotosPT = L.tileLayer.wms('https://ortos.dgterritorio.gov.pt/wms/ortosat2023', {
+                layers: 'ortoSat2023-CorVerdadeira',
+                format: 'image/png',
+                transparent: true,
+                attribution: '© DGTerritório'
+            });
+            
+            // Adicionar OSM por defeito
+            osmBase.addTo(map);
+            
+            // Controlo de camadas
+            const baseMaps = {
+                "🗺️ OpenStreetMap": osmBase,
+                "🛰️ Google Hybrid": googleHybrid,
+                "📷 Ortofotos PT 2023": ortofotosPT
+            };
+            
+            const overlayMaps = {
+                "🔵 Trilha GPS": layers.track,
+                "🔴 Pontos Críticos": layers.critical,
+                "⚫ Estrada Base": layers.road
+            };
+            
+            L.control.layers(baseMaps, overlayMaps, {
+                position: 'topright',
+                collapsed: false
+            }).addTo(map);
             
             // Estrada base
             layers.road = L.geoJSON(DATA.estrada, {
@@ -723,5 +822,11 @@
             }
         });
     </script>
+    
+    <!-- Créditos -->
+    <div id="credits">
+        Desenvolvido por <a href="https://www.linkedin.com/in/jose-mesquita-guimaraes" target="_blank">José Mesquita Guimarães</a>
+    </div>
+    
 </body>
 </html>
