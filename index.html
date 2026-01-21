@@ -170,8 +170,50 @@
             margin: 10px 0;
             max-height: 200px;
             object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .popup-content img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         .popup-content p { margin: 5px 0; font-size: 13px; }
+        
+        /* Modal para foto em tamanho real */
+        #foto-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            cursor: pointer;
+        }
+        #foto-modal img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        #foto-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10001;
+        }
+        #foto-modal-close:hover {
+            color: #bbb;
+        }
         
         @media (max-width: 768px) {
             #container { flex-direction: column; }
@@ -231,6 +273,12 @@
 
     <!-- Ecrã do Visualizador -->
     <div id="viewer-screen">
+                <!-- Modal para foto em tamanho real -->
+        <div id="foto-modal" onclick="fecharModal()">
+            <span id="foto-modal-close">&times;</span>
+            <img id="foto-modal-img">
+        </div>
+        
         <div id="container">
             <div id="map-container">
                 <div id="map"></div>
@@ -622,6 +670,23 @@
             const bounds = L.latLngBounds(all.map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]));
             map.fitBounds(bounds, { padding: [50, 50] });
         }
+
+                // Funções para modal de foto
+        function abrirFoto(url) {
+            document.getElementById('foto-modal-img').src = url;
+            document.getElementById('foto-modal').style.display = 'block';
+        }
+        
+        function fecharModal() {
+            document.getElementById('foto-modal').style.display = 'none';
+        }
+        
+        // Fechar modal com tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fecharModal();
+            }
+        });
     </script>
 </body>
 </html>
