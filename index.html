@@ -278,13 +278,14 @@
         }
         
         .popup-content h3 { 
-            margin: 0;
-            padding: 16px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            color: white; 
+            border: none; 
+            padding: 10px 16px; 
+            border-radius: 8px; 
+            margin: 0 5px 8px 0;
             font-size: 16px;
             font-weight: 600;
-            border-bottom: 3px solid rgba(255,255,255,0.2);
+            box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
         }
         
         .popup-content p { 
@@ -297,6 +298,11 @@
         
         .popup-content p:last-of-type {
             border-bottom: none;
+        }
+        
+        .popup-content p strong1 {
+            color: #667eea;
+            font-weight: 600;
         }
         
         .popup-content p strong {
@@ -772,10 +778,10 @@
                     html: `
                         <div style="
                             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-                            border: 3px solid white;
+                            border: 2px solid white;
                             border-radius: 50%;
-                            width: 36px;
-                            height: 36px;
+                            width: 30px;
+                            height: 30px;
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -795,11 +801,11 @@
                 const m = L.marker([c[1], c[0]], { icon });
                 
                 let popup = `<div class="popup-content">
-                    <h3>📍 Ponto ${p.id} - Troço ${p.Troço}</h3>`;
-                popup += `<p>${p.descricao || 'Sem descrição'}</p>`;
+                    <h3>📍 Ponto ${p.id}</h3>`;
+                popup += `<p><strong1>${p.descricao || 'Sem descrição'}</strong1></p>`;
                 if (p.largura_aproximada) popup += `<p><strong>↔️ Largura:</strong> ${p.largura_aproximada}m</p>`;
                 if (p.altura_aproximada) popup += `<p><strong>⬆️ Altura:</strong> ${p.altura_aproximada}m</p>`;
-                if (p.Obs) popup += `<p><strong>💬 Observações:</strong><br>${p.Obs.replace(/\n/g, '<br>')}</p>`;
+                if (p.Obs) popup += `<p><strong>💬 Observações:</strong><br><br>${p.Obs.replace(/\n/g, '<br>')}</p>`;
                 
                 // Procurar foto correspondente
                 if (p.foto) {
