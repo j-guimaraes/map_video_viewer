@@ -406,13 +406,13 @@
     <!-- Ecrã de Upload -->
     <div id="upload-screen">
         <div class="upload-container">
-            <h1>🗺️ Visualizador de Trajeto e Vídeo Georreferenciado</h1>
-            <p>Carregue os 3 ficheiros GeoJSON e a pasta de fotografias para começar</p>
+            <h1>🗺️ Georeferenced Route and Video Viewer</h1>
+            <p>Upload the 3 GeoJSON files and photo folder to get started</p>
             
             <div class="upload-area" id="area-pontos">
                 <label for="file-pontos">
                     <div class="upload-icon">📍</div>
-                    <div class="upload-text">Pontos Críticos (.json)</div>
+                    <div class="upload-text">Critical Points (.json)</div>
                     <div class="upload-status" id="status-pontos"></div>
                 </label>
                 <input type="file" id="file-pontos" accept=".json,.geojson">
@@ -421,7 +421,7 @@
             <div class="upload-area" id="area-track">
                 <label for="file-track">
                     <div class="upload-icon">🛰️</div>
-                    <div class="upload-text">Track Points GPS (.json)</div>
+                    <div class="upload-text">GPS Track (.json)</div>
                     <div class="upload-status" id="status-track"></div>
                 </label>
                 <input type="file" id="file-track" accept=".json,.geojson">
@@ -430,7 +430,7 @@
             <div class="upload-area" id="area-estrada">
                 <label for="file-estrada">
                     <div class="upload-icon">🛣️</div>
-                    <div class="upload-text">Estrada Base (.json)</div>
+                    <div class="upload-text">Route (.json)</div>
                     <div class="upload-status" id="status-estrada"></div>
                 </label>
                 <input type="file" id="file-estrada" accept=".json,.geojson">
@@ -439,7 +439,7 @@
             <div class="upload-area" id="area-fotos">
                 <label for="file-fotos">
                     <div class="upload-icon">📸</div>
-                    <div class="upload-text">Pasta de Fotos (múltiplos .jpg)</div>
+                    <div class="upload-text">Photo's folder (multiple .jpg)</div>
                     <div class="upload-status" id="status-fotos"></div>
                 </label>
                 <input type="file" id="file-fotos" accept="image/*" multiple webkitdirectory directory>
@@ -447,7 +447,7 @@
             
             <div id="error-container"></div>
             
-            <button class="btn-start" id="btn-start" disabled>Iniciar Visualizador</button>
+            <button class="btn-start" id="btn-start" disabled>Upload to Viewer</button>
         </div>
     </div>
 
@@ -462,7 +462,7 @@
         <div id="container">
             <header id="header">
               <img id="logo" src="logoMGCS.jpg" alt="Logo">
-              <h1> 🗺️ Visualizador de Trajeto e Vídeo Georreferenciado</h1>
+              <h1> 🗺️ Georeferenced Route and Video Viewer</h1>
             </header>
 
             <div id="map-container">
@@ -472,21 +472,21 @@
                 <div id="player"></div>
                 <div id="controls">
                     <div class="control-group">
-                        <label>Estado da Sincronização</label>
-                        <span id="sync-indicator">A carregar...</span>
+                        <label>Sync Status</label>
+                        <span id="sync-indicator">Uploading...</span>
                     </div>
                     
                     <div class="control-group">
-                        <label>Controlos</label>
+                        <label>Controls</label>
                         <button class="control-btn" onclick="togglePlayPause()">▶️ Play/Pause</button>
-                        <button class="control-btn" onclick="resetView()">🔄 Reset Vista</button>
+                        <button class="control-btn" onclick="resetView()">🔄 Reset View</button>
                     </div>
                     
                     <div class="info-box">
-                        <div><strong>Pontos Críticos:</strong> <span id="info-critical">-</span></div>
-                        <div><strong>Pontos GPS:</strong> <span id="info-track">-</span></div>
-                        <div><strong>Distância:</strong> <span id="info-distance">-</span></div>
-                        <div><strong>Tempo:</strong> <span id="current-time">00:00</span> / <span id="total-time">00:00</span></div>
+                        <div><strong>Critical/Relevant Points:</strong> <span id="info-critical">-</span></div>
+                        <div><strong>GPS Track:</strong> <span id="info-track">-</span></div>
+                        <div><strong>Distance:</strong> <span id="info-distance">-</span></div>
+                        <div><strong>Time:</strong> <span id="current-time">00:00</span> / <span id="total-time">00:00</span></div>
                     </div>
                 </div>
             </div>
@@ -538,7 +538,7 @@
                         }
                         
                         DATA[type] = data;
-                        status.textContent = '✓ Carregado';
+                        status.textContent = '✓ Loaded';
                         area.classList.add('loaded');
                         
                         // Extrair Video ID se for track
@@ -556,8 +556,8 @@
                         
                         checkAllLoaded();
                     } catch (err) {
-                        showError(`Erro ao ler ${type}: ${err.message}`);
-                        status.textContent = '✗ Erro';
+                        showError(`Error reading ${type}: ${err.message}`);
+                        status.textContent = '✗ Error';
                     }
                 };
                 reader.readAsText(file);
@@ -606,11 +606,11 @@
                 });
                 
                 if (count > 0) {
-                    status.textContent = `✓ ${count} foto${count > 1 ? 's' : ''} carregada${count > 1 ? 's' : ''}`;
+                    status.textContent = `✓ ${count} Photo${count > 1 ? 's' : ''} Uploaded${count > 1 ? 's' : ''}`;
                     area.classList.add('loaded');
                     checkAllLoaded();
                 } else {
-                    status.textContent = '✗ Nenhuma imagem encontrada';
+                    status.textContent = '✗ No images found';
                 }
             });
         }
@@ -657,17 +657,17 @@
         
         function onPlayerError(event) {
             const errors = {
-                2: 'Pedido inválido',
-                5: 'Erro no player HTML5',
-                100: 'Vídeo não encontrado',
-                101: 'Vídeo não permite embedding',
-                150: 'Vídeo restrito para embedding',
-                153: 'Erro de referrer - ficheiro local não suportado'
+                2: 'Invalid Request',
+                5: 'Error on HTML5 player',
+                100: 'Video not found',
+                101: 'Video does not allow embedding',
+                150: 'Restricted video for embedding',
+                153: 'Referrer error - local file not supported'
             };
             
             if (event.data === 153) {
                 // Erro 153: ficheiro local não funciona
-                document.getElementById('sync-indicator').textContent = 'Modo Só Mapa (Erro 153)';
+                document.getElementById('sync-indicator').textContent = 'Map Only Mode (Error 153)';
                 document.getElementById('sync-indicator').classList.add('inactive');
                 
                 // Criar link para YouTube
@@ -676,18 +676,18 @@
                 playerDiv.innerHTML = `
                     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#1a1a1a;color:white;text-align:center;padding:20px;">
                         <div style="font-size:48px;margin-bottom:20px;">⚠️</div>
-                        <div style="font-size:16px;margin-bottom:10px;font-weight:bold;">Erro 153: YouTube bloqueado</div>
-                        <div style="font-size:13px;color:#aaa;margin-bottom:20px;">Ficheiros locais (file://) não podem carregar vídeos do YouTube</div>
-                        <a href="${videoLink}" target="_blank" style="background:#ff0000;color:white;padding:12px 24px;border-radius:5px;text-decoration:none;font-weight:bold;">▶️ Abrir no YouTube</a>
-                        <div style="font-size:12px;color:#666;margin-top:20px;">💡 Solução: Usa um servidor local ou hospeda online</div>
+                        <div style="font-size:16px;margin-bottom:10px;font-weight:bold;">Error 153: YouTube blocked</div>
+                        <div style="font-size:13px;color:#aaa;margin-bottom:20px;">Local files (file://) can't upload YouTube videos</div>
+                        <a href="${videoLink}" target="_blank" style="background:#ff0000;color:white;padding:12px 24px;border-radius:5px;text-decoration:none;font-weight:bold;">▶️ Open in YouTube</a>
+                        <div style="font-size:12px;color:#666;margin-top:20px;">💡 Solution: Use a local server or host online</div>
                     </div>
                 `;
                 
                 // Continuar com mapa funcional
-                alert('⚠️ Erro 153: YouTube bloqueado em ficheiros locais\n\n✅ O MAPA continua funcional!\n\n💡 Soluções:\n1. Abrir vídeo noutra janela (link criado)\n2. Usar servidor local (python -m http.server)\n3. Hospedar online (GitHub Pages, Netlify)');
+                alert('⚠️ Error 153: YouTube stuck on local files\n\n✅ The map remains functional!\n\n💡 Solutions:\n1. Open video in other tab (link generated)\n2. Use a local server (python -m http.server)\n3. Online host (GitHub Pages, Netlify)');
             } else {
-                alert('⚠️ Erro YouTube (' + event.data + '): ' + (errors[event.data] || 'Erro desconhecido'));
-                document.getElementById('sync-indicator').textContent = 'Erro no Vídeo';
+                alert('⚠️ Erro YouTube (' + event.data + '): ' + (errors[event.data] || 'Unknown error'));
+                document.getElementById('sync-indicator').textContent = 'Video Error';
                 document.getElementById('sync-indicator').classList.add('inactive');
             }
         }
@@ -803,11 +803,11 @@
                 const m = L.marker([c[1], c[0]], { icon });
                 
                 let popup = `<div class="popup-content">
-                    <h3>📍 Ponto ${p.id}</h3>`;
-                popup += `<p><strong1>${p.descricao || 'Sem descrição'}</strong1></p>`;
-                if (p.largura_aproximada) popup += `<p><strong>↔️ Largura:</strong> ${p.largura_aproximada}m</p>`;
-                if (p.altura_aproximada) popup += `<p><strong>⬆️ Altura:</strong> ${p.altura_aproximada}m</p>`;
-                if (p.Obs) popup += `<p><strong>💬 Observações:</strong><br><br>${p.Obs.replace(/\n/g, '<br>')}</p>`;
+                    <h3>📍 Point ${p.id}</h3>`;
+                popup += `<p><strong1>${p.descricao || 'No description'}</strong1></p>`;
+                if (p.largura_aproximada) popup += `<p><strong>↔️ Width:</strong> ${p.largura_aproximada}m</p>`;
+                if (p.altura_aproximada) popup += `<p><strong>⬆️ Height:</strong> ${p.altura_aproximada}m</p>`;
+                if (p.Obs) popup += `<p><strong>💬 Notes:</strong><br><br>${p.Obs.replace(/\n/g, '<br>')}</p>`;
                 
                 // Procurar foto correspondente
                 if (p.foto) {
@@ -822,13 +822,13 @@
                     }
                     
                     if (fotoUrl) {
-                        popup += `<img src="${fotoUrl}" alt="Foto do ponto" onclick="abrirFoto('${fotoUrl}'); event.stopPropagation();" title="Clique para ampliar">`;
+                        popup += `<img src="${fotoUrl}" alt="Photo" onclick="abrirFoto('${fotoUrl}'); event.stopPropagation();" title="Click to open">`;
                     } else {
-                        popup += `<p style="color:#999;font-size:11px;padding:8px 20px;">📷 Foto não encontrada: ${fotoNome}</p>`;
+                        popup += `<p style="color:#999;font-size:11px;padding:8px 20px;">📷 Photo not found: ${fotoNome}</p>`;
                     }
                 }
                 
-                if (p.video) popup += `<a href="${p.video}" target="_blank">🎥 Assistir Vídeo</a>`;
+                if (p.video) popup += `<a href="${p.video}" target="_blank">🎥 Open video in another tab</a>`;
                 popup += '</div>';
                 
                 m.bindPopup(popup, { 
@@ -844,13 +844,13 @@
             const baseMaps = {
                 "🗺️ OpenStreetMap": osmBase,
                 "🛰️ Google Hybrid": googleHybrid,
-                "📷 Ortofotos PT 2023": ortofotosPT
+                "📷 Orthophotos PT 2023": ortofotosPT
             };
             
             const overlayMaps = {
-                "🔵 Trilha GPS": layers.track,
-                "🔴 Pontos Críticos": layers.critical,
-                "⚫ Estrada Base": layers.road
+                "🔵 GPS Track": layers.track,
+                "🔴 Critical/Relevant Points": layers.critical,
+                "⚫ Route": layers.road
             };
             
             L.control.layers(baseMaps, overlayMaps, {
@@ -888,7 +888,7 @@
                     }
                 });
                 
-                document.getElementById('sync-indicator').textContent = 'Sincronizado';
+                document.getElementById('sync-indicator').textContent = 'Synchronized';
                 document.getElementById('sync-indicator').classList.remove('inactive');
             }, 500);
         }
@@ -942,7 +942,7 @@
     
     <!-- Créditos -->
     <div id="credits">
-        Desenvolvido por <a href="https://www.linkedin.com/in/jose-mesquita-guimaraes" target="_blank">José Mesquita Guimarães</a>
+        Developed by <a href="https://www.linkedin.com/in/jose-mesquita-guimaraes" target="_blank">José Mesquita Guimarães</a>
     </div>
     
 </body>
