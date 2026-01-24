@@ -409,7 +409,7 @@
             <h1>🗺️ Georeferenced Route and Video Viewer</h1>
             <p>Upload the 3 GeoJSON files and photo folder to get started</p>
             
-            <div class="upload-area" id="area-pontos">
+            <div class="upload-area" id="area-points">
                 <label for="file-points">
                     <div class="upload-icon">📍</div>
                     <div class="upload-text">Critical Points (.json)</div>
@@ -436,13 +436,13 @@
                 <input type="file" id="file-route" accept=".json,.geojson">
             </div>
             
-            <div class="upload-area" id="area-Photos">
-                <label for="file-Photos">
+            <div class="upload-area" id="area-photos">
+                <label for="file-photos">
                     <div class="upload-icon">📸</div>
                     <div class="upload-text">Photo's folder (multiple .jpg)</div>
                     <div class="upload-status" id="status-Photos"></div>
                 </label>
-                <input type="file" id="file-Photos" accept="image/*" multiple webkitdirectory directory>
+                <input type="file" id="file-photos" accept="image/*" multiple webkitdirectory directory>
             </div>
             
             <div id="error-container"></div>
@@ -526,7 +526,7 @@
                         const data = JSON.parse(event.target.result);
                         
                         // Processar dados
-                        if (type === 'points') {
+                        if (type === 'point') {
                             // Adicionar .jpg aos nomes das Photos
                             data.features = data.features.map(f => ({
                                 ...f,
@@ -584,8 +584,8 @@
         
         // Upload de Photos
         function setupPhotosUpload() {
-            const input = document.getElementById('file-Photos');
-            const area = document.getElementById('area-Photos');
+            const input = document.getElementById('file-photos');
+            const area = document.getElementById('area-photos');
             const status = document.getElementById('status-Photos');
             
             input.addEventListener('change', (e) => {
@@ -606,7 +606,7 @@
                 });
                 
                 if (count > 0) {
-                    status.textContent = `✓ ${count} Photo${count > 1 ? 's' : ''} Uploaded${count > 1 ? 's' : ''}`;
+                    status.textContent = `✓ ${count} Photo${count > 1 ? 's' : ''} Uploaded`;
                     area.classList.add('loaded');
                     checkAllLoaded();
                 } else {
