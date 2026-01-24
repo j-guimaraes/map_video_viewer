@@ -410,12 +410,12 @@
             <p>Upload the 3 GeoJSON files and photo folder to get started</p>
             
             <div class="upload-area" id="area-pontos">
-                <label for="file-pontos">
+                <label for="file-points">
                     <div class="upload-icon">📍</div>
                     <div class="upload-text">Critical Points (.json)</div>
-                    <div class="upload-status" id="status-pontos"></div>
+                    <div class="upload-status" id="status-points"></div>
                 </label>
-                <input type="file" id="file-pontos" accept=".json,.geojson">
+                <input type="file" id="file-points" accept=".json,.geojson">
             </div>
             
             <div class="upload-area" id="area-track">
@@ -427,13 +427,13 @@
                 <input type="file" id="file-track" accept=".json,.geojson">
             </div>
             
-            <div class="upload-area" id="area-estrada">
-                <label for="file-estrada">
+            <div class="upload-area" id="area-route">
+                <label for="file-route">
                     <div class="upload-icon">🛣️</div>
                     <div class="upload-text">Route (.json)</div>
-                    <div class="upload-status" id="status-estrada"></div>
+                    <div class="upload-status" id="status-route"></div>
                 </label>
-                <input type="file" id="file-estrada" accept=".json,.geojson">
+                <input type="file" id="file-route" accept=".json,.geojson">
             </div>
             
             <div class="upload-area" id="area-Photos">
@@ -497,9 +497,9 @@
     <script>
         // Dados carregados
         let DATA = {
-            pontos: null,
+            points: null,
             track: null,
-            estrada: null,
+            route: null,
             videoId: null,
             Photos: {}  // Objeto para armazenar Photos como URLs
         };
@@ -526,7 +526,7 @@
                         const data = JSON.parse(event.target.result);
                         
                         // Processar dados
-                        if (type === 'pontos') {
+                        if (type === 'points') {
                             // Adicionar .jpg aos nomes das Photos
                             data.features = data.features.map(f => ({
                                 ...f,
@@ -544,8 +544,8 @@
                         // Extrair Video ID se for track
                         if (type === 'track' && !DATA.videoId) {
                             for (const f of data.features) {
-                                if (f.properties.Video) {
-                                    const match = f.properties.Video.match(/(?:v=|youtu\.be\/)([^&?]+)/);
+                                if (f.properties.link_video) {
+                                    const match = f.properties.link_video.match(/(?:v=|youtu\.be\/)([^&?]+)/);
                                     if (match) {
                                         DATA.videoId = match[1];
                                         break;
@@ -566,7 +566,7 @@
         
         function checkAllLoaded() {
             const btn = document.getElementById('btn-start');
-            if (DATA.pontos && DATA.track && DATA.estrada && Object.keys(DATA.Photos).length > 0) {
+            if (DATA.points && DATA.track && DATA.route && Object.keys(DATA.Photos).length > 0) {
                 btn.disabled = false;
             }
         }
@@ -577,9 +577,9 @@
         }
         
         // Inicializar uploads
-        setupFileUpload('pontos', 'file-pontos', 'area-pontos', 'status-pontos');
+        setupFileUpload('points', 'file-points', 'area-points', 'status-points');
         setupFileUpload('track', 'file-track', 'area-track', 'status-track');
-        setupFileUpload('estrada', 'file-estrada', 'area-estrada', 'status-estrada');
+        setupFileUpload('route', 'file-route', 'area-route', 'status-route');
         setupPhotosUpload();
         
         // Upload de Photos
@@ -693,9 +693,9 @@
         }
         
         function updateStats() {
-            document.getElementById('info-critical').textContent = DATA.pontos.features.length;
+            document.getElementById('info-critical').textContent = DATA.points.features.length;
             document.getElementById('info-track').textContent = DATA.track.features.length;
-            const dist = DATA.estrada.features[0]?.properties?.Comprimento || 0;
+            const dist = DATA.route.features[0]?.properties?.Comprimento || 0;
             document.getElementById('info-distance').textContent = (dist / 1000).toFixed(2) + ' km';
         }
         
@@ -724,7 +724,7 @@
             osmBase.addTo(map);
             
             // Estrada base
-            layers.road = L.geoJSON(DATA.estrada, {
+            layers.road = L.geoJSON(DATA.route, {
                 style: { color: '#666', weight: 4, opacity: 0.6 }
             }).addTo(map);
             
@@ -772,7 +772,7 @@
             
             // Pontos críticos
             // Pontos críticos com estilo moderno
-            DATA.pontos.features.forEach(f => {
+            DATA.points.features.forEach(f => {
                 const c = f.geometry.coordinates;
                 const p = f.properties;
                 
@@ -828,7 +828,7 @@
                     }
                 }
                 
-                if (p.video) popup += `<a href="${p.video}" target="_blank">🎥 Open video in another tab</a>`;
+                if (p.Video) popup += `<a href="${p.Video}" target="_blank">🎥 Open video in another tab</a>`;
                 popup += '</div>';
                 
                 m.bindPopup(popup, { 
@@ -859,7 +859,7 @@
             }).addTo(map);
             
             // Ajustar vista
-            const all = [...DATA.track.features, ...DATA.pontos.features];
+            const all = [...DATA.track.features, ...DATA.points.features];
             const bounds = L.latLngBounds(all.map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]));
             map.fitBounds(bounds, { padding: [50, 50] });
         }
@@ -917,7 +917,7 @@
         }
         
         function resetView() {
-            const all = [...DATA.track.features, ...DATA.pontos.features];
+            const all = [...DATA.track.features, ...DATA.points.features];
             const bounds = L.latLngBounds(all.map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]));
             map.fitBounds(bounds, { padding: [50, 50] });
         }
