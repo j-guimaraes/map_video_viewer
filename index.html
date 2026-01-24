@@ -805,8 +805,8 @@
                 let popup = `<div class="popup-content">
                     <h3>📍 Point ${p.id}</h3>`;
                 popup += `<p><strong1>${p.Description || 'No description'}</strong1></p>`;
-                if (p.Approximate width (m)) popup += `<p><strong>↔️ Width:</strong> ${p.Approximate width (m)}m</p>`;
-                if (p.Approximate height (m)) popup += `<p><strong>⬆️ Height:</strong> ${p.Approximate height (m)}m</p>`;
+                if (p.['Approximate width (m)']) popup += `<p><strong>↔️ Width:</strong> ${p.['Approximate width (m)']}m</p>`;
+                if (p.['Approximate height (m)']) popup += `<p><strong>⬆️ Height:</strong> ${p.['Approximate height (m)']}m</p>`;
                 if (p.Remarks) popup += `<p><strong>💬 Notes:</strong><br><br>${p.Remarks.replace(/\n/g, '<br>')}</p>`;
                 
                 // Procurar Photo correspondente
