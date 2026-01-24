@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador de Trajeto</title>
+    <title>Georreferenced Video Viewer</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -347,8 +347,8 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
         }
         
-        /* Modal para foto em tamanho real */
-        #foto-modal {
+        /* Modal para Photo em tamanho real */
+        #Photo-modal {
             display: none;
             position: fixed;
             z-index: 10000;
@@ -359,7 +359,7 @@
             background-color: rgba(0,0,0,0.9);
             cursor: pointer;
         }
-        #foto-modal img {
+        #Photo-modal img {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -369,7 +369,7 @@
             object-fit: contain;
             border-radius: 8px;
         }
-        #foto-modal-close {
+        #Photo-modal-close {
             position: absolute;
             top: 20px;
             right: 35px;
@@ -379,7 +379,7 @@
             cursor: pointer;
             z-index: 10001;
         }
-        #foto-modal-close:hover {
+        #Photo-modal-close:hover {
             color: #bbb;
         }
         
@@ -436,13 +436,13 @@
                 <input type="file" id="file-estrada" accept=".json,.geojson">
             </div>
             
-            <div class="upload-area" id="area-fotos">
-                <label for="file-fotos">
+            <div class="upload-area" id="area-Photos">
+                <label for="file-Photos">
                     <div class="upload-icon">📸</div>
                     <div class="upload-text">Photo's folder (multiple .jpg)</div>
-                    <div class="upload-status" id="status-fotos"></div>
+                    <div class="upload-status" id="status-Photos"></div>
                 </label>
-                <input type="file" id="file-fotos" accept="image/*" multiple webkitdirectory directory>
+                <input type="file" id="file-Photos" accept="image/*" multiple webkitdirectory directory>
             </div>
             
             <div id="error-container"></div>
@@ -453,10 +453,10 @@
 
     <!-- Ecrã do Visualizador -->
     <div id="viewer-screen">
-        <!-- Modal para foto em tamanho real -->
-        <div id="foto-modal" onclick="fecharModal()">
-            <span id="foto-modal-close">&times;</span>
-            <img id="foto-modal-img">
+        <!-- Modal para Photo em tamanho real -->
+        <div id="Photo-modal" onclick="fecharModal()">
+            <span id="Photo-modal-close">&times;</span>
+            <img id="Photo-modal-img">
         </div>
         
         <div id="container">
@@ -501,7 +501,7 @@
             track: null,
             estrada: null,
             videoId: null,
-            fotos: {}  // Objeto para armazenar fotos como URLs
+            Photos: {}  // Objeto para armazenar Photos como URLs
         };
         
         // Variáveis do visualizador
@@ -527,12 +527,12 @@
                         
                         // Processar dados
                         if (type === 'pontos') {
-                            // Adicionar .jpg aos nomes das fotos
+                            // Adicionar .jpg aos nomes das Photos
                             data.features = data.features.map(f => ({
                                 ...f,
                                 properties: {
                                     ...f.properties,
-                                    foto: f.properties.foto ? `${f.properties.foto}.jpg` : null
+                                    Photo: f.properties.Photo ? `${f.properties.Photo}.jpg` : null
                                 }
                             }));
                         }
@@ -544,8 +544,8 @@
                         // Extrair Video ID se for track
                         if (type === 'track' && !DATA.videoId) {
                             for (const f of data.features) {
-                                if (f.properties.link_video) {
-                                    const match = f.properties.link_video.match(/(?:v=|youtu\.be\/)([^&?]+)/);
+                                if (f.properties.Video) {
+                                    const match = f.properties.Video.match(/(?:v=|youtu\.be\/)([^&?]+)/);
                                     if (match) {
                                         DATA.videoId = match[1];
                                         break;
@@ -566,7 +566,7 @@
         
         function checkAllLoaded() {
             const btn = document.getElementById('btn-start');
-            if (DATA.pontos && DATA.track && DATA.estrada && Object.keys(DATA.fotos).length > 0) {
+            if (DATA.pontos && DATA.track && DATA.estrada && Object.keys(DATA.Photos).length > 0) {
                 btn.disabled = false;
             }
         }
@@ -580,27 +580,27 @@
         setupFileUpload('pontos', 'file-pontos', 'area-pontos', 'status-pontos');
         setupFileUpload('track', 'file-track', 'area-track', 'status-track');
         setupFileUpload('estrada', 'file-estrada', 'area-estrada', 'status-estrada');
-        setupFotosUpload();
+        setupPhotosUpload();
         
-        // Upload de fotos
-        function setupFotosUpload() {
-            const input = document.getElementById('file-fotos');
-            const area = document.getElementById('area-fotos');
-            const status = document.getElementById('status-fotos');
+        // Upload de Photos
+        function setupPhotosUpload() {
+            const input = document.getElementById('file-Photos');
+            const area = document.getElementById('area-Photos');
+            const status = document.getElementById('status-Photos');
             
             input.addEventListener('change', (e) => {
                 const files = e.target.files;
                 if (!files || files.length === 0) return;
                 
                 let count = 0;
-                DATA.fotos = {}; // Limpar fotos anteriores
+                DATA.Photos = {}; // Limpar Photos anteriores
                 
                 // Processar cada ficheiro
                 Array.from(files).forEach(file => {
                     if (file.type.startsWith('image/')) {
                         const url = URL.createObjectURL(file);
                         // Guardar com o nome do ficheiro
-                        DATA.fotos[file.name] = url;
+                        DATA.Photos[file.name] = url;
                         count++;
                     }
                 });
@@ -713,7 +713,7 @@
                 maxZoom: 20
             });
             
-            const ortofotosPT = L.tileLayer.wms('https://ortos.dgterritorio.gov.pt/wms/ortosat2023', {
+            const ortoPhotosPT = L.tileLayer.wms('https://ortos.dgterritorio.gov.pt/wms/ortosat2023', {
                 layers: 'ortoSat2023-CorVerdadeira',
                 format: 'image/png',
                 transparent: true,
@@ -804,27 +804,27 @@
                 
                 let popup = `<div class="popup-content">
                     <h3>📍 Point ${p.id}</h3>`;
-                popup += `<p><strong1>${p.descricao || 'No description'}</strong1></p>`;
-                if (p.largura_aproximada) popup += `<p><strong>↔️ Width:</strong> ${p.largura_aproximada}m</p>`;
-                if (p.altura_aproximada) popup += `<p><strong>⬆️ Height:</strong> ${p.altura_aproximada}m</p>`;
-                if (p.Obs) popup += `<p><strong>💬 Notes:</strong><br><br>${p.Obs.replace(/\n/g, '<br>')}</p>`;
+                popup += `<p><strong1>${p.Description || 'No description'}</strong1></p>`;
+                if (p.Approximate width (m)) popup += `<p><strong>↔️ Width:</strong> ${p.Approximate width (m)}m</p>`;
+                if (p.Approximate height (m)) popup += `<p><strong>⬆️ Height:</strong> ${p.Approximate height (m)}m</p>`;
+                if (p.Remarks) popup += `<p><strong>💬 Notes:</strong><br><br>${p.Remarks.replace(/\n/g, '<br>')}</p>`;
                 
-                // Procurar foto correspondente
-                if (p.foto) {
-                    const fotoNome = p.foto.split('/').pop();
-                    let fotoUrl = null;
+                // Procurar Photo correspondente
+                if (p.Photo) {
+                    const PhotoNome = p.Photo.split('/').pop();
+                    let PhotoUrl = null;
                     
-                    for (const [nome, url] of Object.entries(DATA.fotos)) {
-                        if (nome === fotoNome || nome.includes(fotoNome.replace('.jpg', ''))) {
-                            fotoUrl = url;
+                    for (const [nome, url] of Object.entries(DATA.Photos)) {
+                        if (nome === PhotoNome || nome.includes(PhotoNome.replace('.jpg', ''))) {
+                            PhotoUrl = url;
                             break;
                         }
                     }
                     
-                    if (fotoUrl) {
-                        popup += `<img src="${fotoUrl}" alt="Photo" onclick="abrirFoto('${fotoUrl}'); event.stopPropagation();" title="Click to open">`;
+                    if (PhotoUrl) {
+                        popup += `<img src="${PhotoUrl}" alt="Photo" onclick="abrirPhoto('${PhotoUrl}'); event.stopPropagation();" title="Click to open">`;
                     } else {
-                        popup += `<p style="color:#999;font-size:11px;padding:8px 20px;">📷 Photo not found: ${fotoNome}</p>`;
+                        popup += `<p style="color:#999;font-size:11px;padding:8px 20px;">📷 Photo not found: ${PhotoNome}</p>`;
                     }
                 }
                 
@@ -844,7 +844,7 @@
             const baseMaps = {
                 "🗺️ OpenStreetMap": osmBase,
                 "🛰️ Google Hybrid": googleHybrid,
-                "📷 Orthophotos PT 2023": ortofotosPT
+                "📷 Orthophotos PT 2023": ortoPhotosPT
             };
             
             const overlayMaps = {
@@ -922,14 +922,14 @@
             map.fitBounds(bounds, { padding: [50, 50] });
         }
         
-        // Funções para modal de foto
-        function abrirFoto(url) {
-            document.getElementById('foto-modal-img').src = url;
-            document.getElementById('foto-modal').style.display = 'block';
+        // Funções para modal de Photo
+        function abrirPhoto(url) {
+            document.getElementById('Photo-modal-img').src = url;
+            document.getElementById('Photo-modal').style.display = 'block';
         }
         
         function fecharModal() {
-            document.getElementById('foto-modal').style.display = 'none';
+            document.getElementById('Photo-modal').style.display = 'none';
         }
         
         // Fechar modal com tecla ESC
